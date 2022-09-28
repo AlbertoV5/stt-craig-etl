@@ -1,0 +1,7 @@
+#+title: etl
+#+subtitle: 
+#+author: Alberto Valdez
+#+SETUPFILE: ../config/org-theme.config
+#+SETUPFILE: ../config/org-header.config
+
+* etl
