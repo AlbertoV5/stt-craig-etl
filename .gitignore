@@ -256,3 +256,4 @@ resources/keys
 resources/secrets
 .python-version
 !public/build
+!docs/build
