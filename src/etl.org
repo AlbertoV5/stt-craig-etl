@@ -1,7 +1,201 @@
-#+title: etl
-#+subtitle: 
+#+title: ETL
+#+subtitle: From audio to text
 #+author: Alberto Valdez
-#+SETUPFILE: ../config/org-theme.config
+#+SETUPFILE: ../config/org-theme-alt.config
 #+SETUPFILE: ../config/org-header.config
 
-* etl
+* Dev Environment
+:PROPERTIES:
+:CUSTOM_ID: dev-environment
+:END:
+
+** Poetry
+:PROPERTIES:
+:CUSTOM_ID: poetry
+:END:
+We are going to install everything under a =poetry= project. So the first thing is to initialize poetry and add the whisper dependency. Then we will add our fork of the whisper repository as submodule of this repo and then add all the dependencies to the poetry environment.
+
+#+begin_src shell :eval no
+poetry init
+#+end_src
+
+#+begin_src shell :eval no
+poetry add git+https://github.com/openai/whisper.git
+#+end_src
+
+#+begin_src shell :dir .. :eval no
+git submodule add git@github.com:AlbertoV5/whisper.git whisper
+#+end_src
+
+#+begin_src shell :dir .. :eval no
+cat whisper/requirements.txt | xargs poetry add
+#+end_src
+
+#+RESULTS[51206ad79a3d9678a0d1296a71edd4af20ac631e]:
+#+begin_example
+Using version ^1.23.3 for numpy
+Using version ^1.12.1 for torch
+Using version ^4.64.1 for tqdm
+Using version ^8.14.0 for more-itertools
+
+Updating dependencies
+Resolving dependencies...
+
+Writing lock file
+
+Package operations: 20 installs, 0 updates, 0 removals
+
+  • Installing certifi (2022.9.24)
+  • Installing charset-normalizer (2.1.1)
+  • Installing idna (3.4)
+  • Installing pyparsing (3.0.9)
+  • Installing urllib3 (1.26.12)
+  • Installing filelock (3.8.0)
+  • Installing packaging (21.3)
+  • Installing pyyaml (6.0)
+  • Installing requests (2.28.1)
+  • Installing tqdm (4.64.1)
+  • Installing typing-extensions (4.3.0)
+  • Installing future (0.18.2)
+  • Installing huggingface-hub (0.10.0)
+  • Installing numpy (1.23.3)
+  • Installing regex (2022.9.13)
+  • Installing tokenizers (0.12.1)
+  • Installing ffmpeg-python (0.2.0)
+  • Installing more-itertools (8.14.0)
+  • Installing torch (1.12.1)
+  • Installing transformers (4.22.2)
+#+end_example
+
+Finall we will install =ffmpeg= globally as we also need it for running =whisper=.
+
+#+begin_src shell :eval no
+brew install ffmpeg
+#+end_src
+
+** Test Case
+:PROPERTIES:
+:CUSTOM_ID: test-case
+:END:
+
+We already have our specifications so we are going to start with a basic test:
+
+- Load a mp4 file through =whisper= and compare the result with a transcipt made by a human.
+
+We are going to add the test to the repository but we won't upload any mp4 file so we will ignore them with =**/*.mp4= in our .gitignore.
+
+** Dealing with audio
+:PROPERTIES:
+:CUSTOM_ID: dealing-with-audio
+:END:
+
+We are going to start by converting the .mp4 video file to a .wav file, which is audio only.
+
+#+begin_src shell :eval no
+ffmpeg -i resources/test.mp4 resources/test.wav
+#+end_src
+
+We are going to change the conversion settings because our source is already compressed at a bitrate of =192kbps=. This means that there is no information in the higher frequencies starting at around =16khz=. However, we expect some files to be even more compressed so we are just gonna set our limit to =12khz= which brings the smaple rate to =24khz= (double the nyquist).
+
+Then we are going to reduce the number of channels from 2 to 1. In an ideal scenario, we would do this by encoding to M/S (midside) and then getting rid of the side channel but we are going to stop at the ffmpeg interface and provide the =-ac 1= flag instead. In the future we can improve the process by finding a Midside tool. The reason for using the mid channel only is that TV broadcasts are mixed with the dialog in the center channel.
+
+#+begin_src shell :dir .. :eval no
+ffmpeg -i resources/test.mp4 -ar 24000 -ac 1 resources/test.wav
+#+end_src
+
+So in the end we end up with the following audio specifications.
+
+| Format | Channels | Sample Rate | Bits |
+|--------+----------+-------------+------|
+| .wav   |        1 |       24000 |   16 |
+
+#+NAME: wavsize
+#+begin_src python :var duration=30
+channels = 1
+samplerate = 24000
+bits = 16
+bits_to_mb = lambda x: x / 8e6
+print(f"{round(duration * samplerate * channels * bits_to_mb(bits), 2)}")
+#+end_src
+
+#+RESULTS[e7b7687e0156fa1d8fe55d0fd89ccb41e93027f3]: wavsize
+#+begin_example
+1.44
+#+end_example
+
+Our test is about 30 seconds long so our final file size will be: call_wavsize(30) {{{results(=1.44=)}}} MB. Assuming the average episode of the TV Show is no more than 40 minutes long, we would have call_wavsize(1200) {{{results(=57.6=)}}} MB of audio to process per episode if we work with .wav files.
+
+We may need to compress to FLAC or MP3 as they are supported by whisper too[fn:1].
+
+** Testing the model
+:PROPERTIES:
+:CUSTOM_ID: testing-the-model
+:END:
+
+Let's start by running =whisper= from the command line.
+
+#+begin_src shell :dir ..
+poetry run whisper resources/test.wav
+#+end_src
+
+We are going to include an MP3 version of the test file in here.
+#+begin_src html :eval yes :wrap export html :exports results
+<audio controls>
+  <source src="../resources/test.mp3" type="audio/mpeg">
+Your browser does not support the audio element.
+</audio>
+#+end_src
+
+#+RESULTS[ca9cbb6e76427c185e46b1f243cac09c94573a17]:
+#+begin_export html
+<audio controls>
+  <source src="../resources/test.mp3" type="audio/mpeg">
+Your browser does not support the audio element.
+</audio>
+#+end_export
+
+And here is the transcript from whisper:
+
+#+begin_src shell :dir ..
+cat test.wav.txt
+#+end_src
+
+#+RESULTS[c4db961da6bdfdec56bea2b4689dc82a8948a6f0]:
+#+begin_example
+Man, it's crazy out there.
+You look sensational, man.
+Well, that's correct.
+And that's not just the cold medication talking.
+I'm telling you.
+You look great.
+You got the beard going on.
+It's very dynamic.
+Oh, thank you very much.
+No, it's good.
+You like Robin Williams?
+You grow a beard.
+Do you want an Oscar?
+No.
+All right.
+All right.
+So listen, tell me about the side-by-side movie you were interviewing.
+Is he really as much of a douche as everyone says he is?
+#+end_example
+
+We can build a test around this just for comparing the different model sizes and helping us chose the parameters for when we scale the process up.
+
+** Scaling the process
+:PROPERTIES:
+:CUSTOM_ID: scaling-the-process
+:END:
+
+We are going to use Assembly AI's analysis[fn:2] to help us decide how to move forward and what technologies we need for running the model with large amounts of data.
+
+Our local CPU takes too long transcribing the 30 seconds and I don't have a GPU available right now so we are definitely going to the cloud.
+
+* Footnotes
+:PROPERTIES:
+:CUSTOM_ID: footnotes
+:END:
+[fn:2]https://www.assemblyai.com/blog/how-to-run-openais-whisper-speech-recognition-model/#openai-whisper-analysis
+[fn:1]https://github.com/openai/whisper

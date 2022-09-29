@@ -1,3 +1,6 @@
 [submodule "config"]
 	path = config
 	url = git@gitlab.com:albertovaldez5/org-config.git
+[submodule "whisper"]
+	path = whisper
+	url = git@github.com:AlbertoV5/whisper.git

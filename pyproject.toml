@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "stt-crag-etl"
+version = "0.1.0"
+description = ""
+authors = ["AlbertoV5 <58243333+AlbertoV5@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "stt_crag_etl"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+whisper = {git = "https://github.com/openai/whisper.git"}
+numpy = "^1.23.3"
+torch = "^1.12.1"
+tqdm = "^4.64.1"
+more-itertools = "^8.14.0"
+transformers = ">=4.19.0"
+ffmpeg-python = "0.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

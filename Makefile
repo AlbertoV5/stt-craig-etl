@@ -13,7 +13,7 @@ STATIC = $(PUBLIC)/resources
 THEME = $(RESOURCES)/theme
 THEME_PUB = $(STATIC)/theme
 # Specific directories for commands to run after publishing.
-INDEX = $(PUBLIC)/index.html
+INDEX = index.html
 README = README.md
 # Project name based
 INDEX_TARGET = build/$(PROJECT_NAME).html
@@ -60,7 +60,7 @@ $(README): $(README_DOC)
 
 $(INDEX): $(CONFIG)/index.py $(PUBLIC)/$(INDEX_TARGET)
 	$(info    Building Index (redirecting to $(INDEX_TARGET))...)
-	@python $< $(INDEX_TARGET) $@
+	@python $< $(PUBLIC)/$(INDEX_TARGET) $@
 	$(DONE)
 
 clean-others: $(INDEX) $(README)
