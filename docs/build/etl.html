@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-09-28 Wed 20:28 -->
+<!-- 2022-09-29 Thu 00:36 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ETL</title>
@@ -31,22 +31,31 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#dev-environment">1. Dev Environment</a>
+<li><a href="#initial-setup">1. Initial Setup</a>
 <ul>
 <li><a href="#poetry">1.1. Poetry</a></li>
 <li><a href="#test-case">1.2. Test Case</a></li>
 <li><a href="#dealing-with-audio">1.3. Dealing with audio</a></li>
 <li><a href="#testing-the-model">1.4. Testing the model</a></li>
 <li><a href="#scaling-the-process">1.5. Scaling the process</a></li>
+<li><a href="#troubleshooting-dependencies">1.6. Troubleshooting Dependencies</a></li>
+</ul>
+</li>
+<li><a href="#visualizing-features">2. Visualizing features</a>
+<ul>
+<li><a href="#loading-audio">2.1. Loading audio</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-dev-environment" class="outline-2">
-<h2 id="dev-environment"><span class="section-number-2">1.</span> Dev Environment</h2>
-<div class="outline-text-2" id="text-dev-environment">
+<div id="outline-container-initial-setup" class="outline-2">
+<h2 id="initial-setup"><span class="section-number-2">1.</span> Initial Setup</h2>
+<div class="outline-text-2" id="text-initial-setup">
+<p>
+<a href="https://albertov5.github.io/stt-craig-etl/build/etl.html">https://albertov5.github.io/stt-craig-etl/build/etl.html</a>
+</p>
 </div>
 
 <div id="outline-container-poetry" class="outline-3">
@@ -56,7 +65,7 @@
 We are going to install everything under a <code>poetry</code> project. So the first thing is to initialize poetry and add the whisper dependency. Then we will add our fork of the whisper repository as submodule of this repo and then add all the dependencies to the poetry environment.
 </p>
 
-<div class="src-name" id="orgb6ff8fa">
+<div class="src-name" id="org0eae770">
 <p>
 
 </p>
@@ -67,7 +76,7 @@ We are going to install everything under a <code>poetry</code> project. So the f
 </pre>
 </div>
 
-<div class="src-name" id="orgb9f927c">
+<div class="src-name" id="orgbf63373">
 <p>
 
 </p>
@@ -78,7 +87,7 @@ We are going to install everything under a <code>poetry</code> project. So the f
 </pre>
 </div>
 
-<div class="src-name" id="org51c4039">
+<div class="src-name" id="orgcbc614d">
 <p>
 
 </p>
@@ -89,7 +98,7 @@ We are going to install everything under a <code>poetry</code> project. So the f
 </pre>
 </div>
 
-<div class="src-name" id="org81c9a0b">
+<div class="src-name" id="org4bc1761">
 <p>
 
 </p>
@@ -104,7 +113,7 @@ We are going to install everything under a <code>poetry</code> project. So the f
 Finall we will install <code>ffmpeg</code> globally as we also need it for running <code>whisper</code>.
 </p>
 
-<div class="src-name" id="org35559bb">
+<div class="src-name" id="org4c2cf94">
 <p>
 
 </p>
@@ -141,14 +150,14 @@ We are going to add the test to the repository but we won&rsquo;t upload any mp4
 We are going to start by converting the .mp4 video file to a .wav file, which is audio only.
 </p>
 
-<div class="src-name" id="org6fee958">
+<div class="src-name" id="orgb283fce">
 <p>
 
 </p>
 
 </div>
 <div class="org-src-container">
-<pre class="src src-shell"><span style="color: #ded492;">ffmpeg</span> <span style="color: #e0e0e0;">-i</span> resources/test.mp4 resources/test.wav
+<pre class="src src-shell"><span style="color: #ded492;">ffmpeg</span> <span style="color: #e0e0e0;">-i</span> resources/test/test.mp4 resources/test/test.wav
 </pre>
 </div>
 
@@ -160,14 +169,14 @@ We are going to change the conversion settings because our source is already com
 Then we are going to reduce the number of channels from 2 to 1. In an ideal scenario, we would do this by encoding to M/S (midside) and then getting rid of the side channel but we are going to stop at the ffmpeg interface and provide the <code>-ac 1</code> flag instead. In the future we can improve the process by finding a Midside tool. The reason for using the mid channel only is that TV broadcasts are mixed with the dialog in the center channel.
 </p>
 
-<div class="src-name" id="org6295b87">
+<div class="src-name" id="orgbb70fdd">
 <p>
 
 </p>
 
 </div>
 <div class="org-src-container">
-<pre class="src src-shell"><span style="color: #ded492;">ffmpeg</span> <span style="color: #e0e0e0;">-i</span> resources/test.mp4 <span style="color: #e0e0e0;">-ar</span> <span style="color: #BBCCAA;">24000</span> <span style="color: #e0e0e0;">-ac</span> <span style="color: #BBCCAA;">1</span> resources/test.wav
+<pre class="src src-shell"><span style="color: #ded492;">ffmpeg</span> <span style="color: #e0e0e0;">-i</span> resources/test/test.mp4 <span style="color: #e0e0e0;">-ar</span> <span style="color: #BBCCAA;">24000</span> <span style="color: #e0e0e0;">-ac</span> <span style="color: #BBCCAA;">1</span> resources/test/test.wav
 </pre>
 </div>
 
@@ -237,59 +246,55 @@ We may need to compress to FLAC or MP3 as they are supported by whisper too<sup>
 Let&rsquo;s start by running <code>whisper</code> from the command line.
 </p>
 
-<div class="src-name" id="org9c71359">
+<div class="src-name" id="org3914ec9">
 <p>
 
 </p>
 
 </div>
 <div class="org-src-container">
-<pre class="src src-shell"><span style="color: #ded492;">poetry</span> run whisper resources/test.wav
+<pre class="src src-shell"><span style="color: #ded492;">poetry</span> run whisper resources/test/test.wav <span style="color: #e0e0e0;">-o</span> resources/test <span style="color: #e0e0e0;">--language</span> en
 </pre>
 </div>
 
 <p>
 We are going to include an MP3 version of the test file in here. <b>Warning:</b> It starts moderately loud.
 </p>
+
+<p>
+For context, this is Craig Ferguson complimenting Keanu Reeves.
+</p>
 <audio controls>
-  <source src="../resources/test.mp3" type="audio/mpeg">
-Your browser does not support the audio element.
+  <source src="../resources/test/test.mp3" type="audio/mpeg">
+Audio element is not supported here.
 </audio>
 
 <p>
-And here is the transcript from whisper:
+And here is the transcript from <code>whisper</code>:
 </p>
 
-<div class="src-name" id="org805a42d">
+<div class="src-name" id="org08b0acf">
 <p>
 
 </p>
 
 </div>
 <div class="org-src-container">
-<pre class="src src-shell"><span style="color: #ded492;">cat</span> test.wav.txt
+<pre class="src src-shell"><span style="color: #ded492;">head</span> resources/test/test.wav.srt
 </pre>
 </div>
 
-<pre class="example" id="orge275b4f">
+<pre class="example" id="org9da8182">
+1
+0:00:00.000 --&gt; 0:00:05.000
 Man, it's crazy out there.
+
+2
+0:00:05.000 --&gt; 0:00:07.000
 You look sensational, man.
-Well, that's correct.
-And that's not just the cold medication talking.
-I'm telling you.
-You look great.
-You got the beard going on.
-It's very dynamic.
-Oh, thank you very much.
-No, it's good.
-You like Robin Williams?
-You grow a beard.
-Do you want an Oscar?
-No.
-All right.
-All right.
-So listen, tell me about the side-by-side movie you were interviewing.
-Is he really as much of a douche as everyone says he is?
+
+3
+0:00:07.000 --&gt; 0:00:08.000
 </pre>
 
 <p>
@@ -310,6 +315,148 @@ Our local CPU takes too long transcribing the 30 seconds and I don&rsquo;t have 
 </p>
 </div>
 </div>
+
+<div id="outline-container-troubleshooting-dependencies" class="outline-3">
+<h3 id="troubleshooting-dependencies"><span class="section-number-3">1.6.</span> Troubleshooting Dependencies</h3>
+<div class="outline-text-3" id="text-troubleshooting-dependencies">
+<p>
+Before dealing with audio signals, we must deal with a correct scipy installation. Because <code>poetry</code> likes to do things one way and scipy another, we must troubleshoot the following issue.
+</p>
+<pre class="example" id="org5596b83">
+The current project's Python requirement (&gt;=3.10,&lt;4.0) is not compatible with some of the required packages Python requirement:
+  - scipy requires Python &gt;=3.8,&lt;3.12, so it will not be satisfied for Python &gt;=3.12,&lt;4.0
+
+Because scipy (1.9.1) requires Python &gt;=3.8,&lt;3.12
+ and no versions of scipy match &gt;1.9.1,&lt;2.0.0, scipy is forbidden.
+So, because stt-crag-etl depends on scipy (^1.9.1), version solving failed.
+</pre>
+
+<p>
+So we simply edit our <code>pyproject.toml</code> file to match scipy&rsquo;s versions. The library <code>librosa</code> will install <code>scipy</code> as a dependency so we must deal with this issue before install <code>librosa</code>.
+</p>
+
+<div class="src-name" id="orge49630a">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-toml">[<span style="color: #35CDAF;">tool.poetry.dependencies</span>]
+<span style="color: #9CDCFE;">python</span> = <span style="color: #CE9178;">"&gt;=3.10,&lt;3.12"</span>
+</pre>
+</div>
+
+<p>
+Finally we will import pandas as its a requirement for <code>plotly express</code>. And we&rsquo;ll add <code>matplotlib</code> for quick visualizations.
+</p>
+<div class="src-name" id="orgc07ff1e">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-shell"><span style="color: #ded492;">poetry</span> add pandas <span style="color: #e0e0e0;">&amp;&amp;</span> <span style="color: #ded492;">poetry</span> add matplotlib
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-visualizing-features" class="outline-2">
+<h2 id="visualizing-features"><span class="section-number-2">2.</span> Visualizing features</h2>
+<div class="outline-text-2" id="text-visualizing-features">
+</div>
+
+<div id="outline-container-loading-audio" class="outline-3">
+<h3 id="loading-audio"><span class="section-number-3">2.1.</span> Loading audio</h3>
+<div class="outline-text-3" id="text-loading-audio">
+<p>
+We will use two libraries for audio visualization, the first one is <code>librosa</code><sup><a id="fnr.3" class="footref" href="#fn.3" role="doc-backlink">3</a></sup> which will help us extracting features from our data and the second one is <code>plotly</code><sup><a id="fnr.4" class="footref" href="#fn.4" role="doc-backlink">4</a></sup> which will use to match our own requirement for the final part of the project, which is a web app that uses <code>plotly</code> with JavaScript.
+</p>
+
+<div class="src-name" id="orgae12a4b">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-shell"><span style="color: #ded492;">poetry</span> add librosa <span style="color: #e0e0e0;">&amp;&amp;</span> <span style="color: #ded492;">poetry</span> add plotly
+</pre>
+</div>
+
+<div class="src-name" id="org4e8bfa4">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> librosa</span>
+<span style="color: #569CD6;">import</span> <span style="color: #4EC9B0;">plotly.express </span><span style="color: #569CD6;">as</span><span style="color: #4EC9B0;"> px</span>
+<span style="color: #569CD6;">import</span> <span style="color: #4EC9B0;">numpy </span><span style="color: #569CD6;">as</span><span style="color: #4EC9B0;"> np</span>
+<span style="color: #569CD6;">from</span><span style="color: #4EC9B0;"> pathlib </span><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> </span><span style="color: #4EC9B0;">Path</span>
+<span style="color: #569CD6;">import</span> <span style="color: #4EC9B0;">matplotlib.pyplot </span><span style="color: #569CD6;">as</span><span style="color: #4EC9B0;"> plt</span>
+<span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> warnings</span>
+
+warnings.<span style="color: #ded492;">filterwarnings</span>(<span style="color: #CE9178;">"ignore"</span>, <span style="color: #9CDCFE;">category</span><span style="color: #e0e0e0;">=</span><span style="color: #4EC9B0;">DeprecationWarning</span>)
+<span style="color: #9CDCFE;">resources</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">Path</span>(<span style="color: #CE9178;">'resources'</span>) <span style="color: #e0e0e0;">/</span> <span style="color: #CE9178;">'test'</span>
+<span style="color: #9CDCFE;">output_file</span> <span style="color: #e0e0e0;">=</span> resources <span style="color: #e0e0e0;">/</span> <span style="color: #CE9178;">'test.png'</span>
+<span style="color: #579C4C;"># Librosa data</span>
+<span style="color: #9CDCFE;">y</span>, <span style="color: #9CDCFE;">sr</span> <span style="color: #e0e0e0;">=</span> librosa.<span style="color: #ded492;">load</span>(resources <span style="color: #e0e0e0;">/</span> <span style="color: #CE9178;">'test.wav'</span>, <span style="color: #9CDCFE;">mono</span><span style="color: #e0e0e0;">=</span><span style="color: #569CD6;">True</span>)
+<span style="color: #579C4C;"># mfcc = librosa.feature.mfcc(y=y[0:22050 * 4], sr=sr, hop_length=512, n_mfcc=13)</span>
+<span style="color: #9CDCFE;">lim</span> <span style="color: #e0e0e0;">=</span> (sr<span style="color: #e0e0e0;">*</span><span style="color: #BBCCAA;">5</span>, sr<span style="color: #e0e0e0;">*</span><span style="color: #BBCCAA;">8</span>)
+<span style="color: #9CDCFE;">data</span> <span style="color: #e0e0e0;">=</span> y[lim[<span style="color: #BBCCAA;">0</span>]:lim[<span style="color: #BBCCAA;">1</span>]]
+<span style="color: #9CDCFE;">oldsr</span> <span style="color: #e0e0e0;">=</span> sr
+<span style="color: #9CDCFE;">sr</span> <span style="color: #e0e0e0;">=</span> <span style="color: #C586C0;">int</span>(sr<span style="color: #e0e0e0;">/</span><span style="color: #BBCCAA;">4</span>)
+<span style="color: #9CDCFE;">data</span> <span style="color: #e0e0e0;">=</span> librosa.<span style="color: #ded492;">resample</span>(data, <span style="color: #9CDCFE;">orig_sr</span><span style="color: #e0e0e0;">=</span>oldsr, <span style="color: #9CDCFE;">target_sr</span><span style="color: #e0e0e0;">=</span>sr)
+plt.<span style="color: #ded492;">figure</span>(<span style="color: #9CDCFE;">figsize</span><span style="color: #e0e0e0;">=</span>(<span style="color: #BBCCAA;">8</span>, <span style="color: #BBCCAA;">5</span>), <span style="color: #9CDCFE;">dpi</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">150</span>)
+plt.<span style="color: #ded492;">specgram</span>(data, <span style="color: #9CDCFE;">Fs</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">2</span>, <span style="color: #9CDCFE;">NFFT</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">256</span>, <span style="color: #9CDCFE;">scale</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">'dB'</span>, <span style="color: #9CDCFE;">cmap</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">'plasma'</span>)
+<span style="color: #579C4C;"># plt.plot(data)</span>
+plt.<span style="color: #ded492;">xticks</span>(<span style="color: #4EC9B0;">np</span>.<span style="color: #ded492;">arange</span>(<span style="color: #BBCCAA;">0</span>, sr<span style="color: #e0e0e0;">*</span><span style="color: #BBCCAA;">1.5</span>, sr<span style="color: #e0e0e0;">/</span><span style="color: #BBCCAA;">4</span>), <span style="color: #9CDCFE;">labels</span><span style="color: #e0e0e0;">=</span><span style="color: #4EC9B0;">np</span>.<span style="color: #ded492;">arange</span>(<span style="color: #BBCCAA;">5</span>, <span style="color: #BBCCAA;">8</span>, <span style="color: #BBCCAA;">0.5</span>))
+plt.<span style="color: #ded492;">yticks</span>(<span style="color: #4EC9B0;">np</span>.<span style="color: #ded492;">arange</span>(<span style="color: #BBCCAA;">0</span>, <span style="color: #BBCCAA;">1</span>, <span style="color: #BBCCAA;">0.2</span>), <span style="color: #9CDCFE;">labels</span><span style="color: #e0e0e0;">=</span><span style="color: #4EC9B0;">np</span>.<span style="color: #ded492;">arange</span>(<span style="color: #BBCCAA;">0</span>, sr, sr<span style="color: #e0e0e0;">/</span><span style="color: #BBCCAA;">5</span>).<span style="color: #ded492;">astype</span>(int))
+plt.<span style="color: #ded492;">title</span>(<span style="color: #CE9178;">"Spectrogram for 'You look sensational, man'"</span>)
+plt.<span style="color: #ded492;">xlabel</span>(<span style="color: #CE9178;">"Time (s)"</span>)
+plt.<span style="color: #ded492;">ylabel</span>(<span style="color: #CE9178;">"Frequency (Hz)"</span>)
+plt.<span style="color: #ded492;">savefig</span>(output_file)
+plt.<span style="color: #ded492;">close</span>()
+<span style="color: #C586C0;">print</span>(output_file, <span style="color: #9CDCFE;">end</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">""</span>)
+</pre>
+</div>
+
+<div class="src-name" id="orgbf79e34">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-shell"><span style="color: #ded492;">python</span> src/audioviz.py
+</pre>
+</div>
+
+<div class="org" id="org566243c">
+
+<div id="org436156d" class="figure">
+<p><img src="../resources/test/test.png" alt="test.png" width="700px" />
+</p>
+</div>
+
+</div>
+
+<p>
+We downsampled the data for the visualization a few times in order to focus on the fundamental frequencies of the voice.
+</p>
+
+<audio controls>
+  <source src="../resources/test/testcut.mp3" type="audio/mpeg">
+Audio element is not supported here.
+</audio>
+</div>
+</div>
 </div>
 <div id="footnotes">
 <h2 class="footnotes">Footnotes: </h2>
@@ -323,12 +470,20 @@ Our local CPU takes too long transcribing the 30 seconds and I don&rsquo;t have 
 <a href="https://www.assemblyai.com/blog/how-to-run-openais-whisper-speech-recognition-model/#openai-whisper-analysis">https://www.assemblyai.com/blog/how-to-run-openais-whisper-speech-recognition-model/#openai-whisper-analysis</a>
 </p></div></div>
 
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<a href="https://librosa.org/doc/latest/index.html">https://librosa.org/doc/latest/index.html</a>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4" role="doc-backlink">4</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<a href="https://plotly.com/python/">https://plotly.com/python/</a>
+</p></div></div>
+
 
 </div>
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Author: Alberto Valdez</p>
-<p class="date">Created: 2022-09-28 Wed 20:28</p>
+<p class="date">Created: 2022-09-29 Thu 00:36</p>
 </div>
 </body>
 </html>

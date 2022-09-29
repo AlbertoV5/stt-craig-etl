@@ -3,11 +3,19 @@
 #+author: Alberto Valdez
 #+SETUPFILE: ../config/org-theme-alt.config
 #+SETUPFILE: ../config/org-header.config
+# -*- eval: (poetry-venv-workon); -*-
 
-* Dev Environment
+#+NAME: str-to-link
+#+begin_src elisp :var data="" width=700 :exports none
+(concat "#+attr_html: :width " (number-to-string width) "\n" "[[" data "]]")
+#+end_src
+
+* Initial Setup
 :PROPERTIES:
-:CUSTOM_ID: dev-environment
+:CUSTOM_ID: initial-setup
 :END:
+
+https://albertov5.github.io/stt-craig-etl/build/etl.html
 
 ** Poetry
 :PROPERTIES:
@@ -55,8 +63,8 @@ We are going to add the test to the repository but we won't upload any mp4 file 
 
 We are going to start by converting the .mp4 video file to a .wav file, which is audio only.
 
-#+begin_src shell :eval no :exports code
-ffmpeg -i resources/test.mp4 resources/test.wav
+#+begin_src shell :eval no :exports code :dir ..
+ffmpeg -i resources/test/test.mp4 resources/test/test.wav
 #+end_src
 
 We are going to change the conversion settings because our source is already compressed at a bitrate of =192kbps=. This means that there is no information in the higher frequencies starting at around =16khz=. However, we expect some files to be even more compressed so we are just gonna set our limit to =12khz= which brings the smaple rate to =24khz= (double the nyquist).
@@ -64,7 +72,7 @@ We are going to change the conversion settings because our source is already com
 Then we are going to reduce the number of channels from 2 to 1. In an ideal scenario, we would do this by encoding to M/S (midside) and then getting rid of the side channel but we are going to stop at the ffmpeg interface and provide the =-ac 1= flag instead. In the future we can improve the process by finding a Midside tool. The reason for using the mid channel only is that TV broadcasts are mixed with the dialog in the center channel.
 
 #+begin_src shell :dir .. :eval no
-ffmpeg -i resources/test.mp4 -ar 24000 -ac 1 resources/test.wav
+ffmpeg -i resources/test/test.mp4 -ar 24000 -ac 1 resources/test/test.wav
 #+end_src
 
 So in the end we end up with the following audio specifications.
@@ -99,51 +107,45 @@ We may need to compress to FLAC or MP3 as they are supported by whisper too[fn:1
 Let's start by running =whisper= from the command line.
 
 #+begin_src shell :dir .. :exports code :eval no
-poetry run whisper resources/test.wav
+poetry run whisper resources/test/test.wav -o resources/test --language en
 #+end_src
 
 We are going to include an MP3 version of the test file in here. *Warning:* It starts moderately loud.
+
+For context, this is Craig Ferguson complimenting Keanu Reeves.
 #+begin_src html :eval yes :wrap export html :exports results
 <audio controls>
-  <source src="../resources/test.mp3" type="audio/mpeg">
-Your browser does not support the audio element.
+  <source src="../resources/test/test.mp3" type="audio/mpeg">
+Audio element is not supported here.
 </audio>
 #+end_src
 
-#+RESULTS[ca9cbb6e76427c185e46b1f243cac09c94573a17]:
+#+RESULTS[633a2111a3026a3b41716e0a9c6e867743077048]:
 #+begin_export html
 <audio controls>
-  <source src="../resources/test.mp3" type="audio/mpeg">
-Your browser does not support the audio element.
+  <source src="../resources/test/test.mp3" type="audio/mpeg">
+Audio element is not supported here.
 </audio>
 #+end_export
 
-And here is the transcript from whisper:
+And here is the transcript from =whisper=:
 
 #+begin_src shell :dir ..
-cat test.wav.txt
+head resources/test/test.wav.srt
 #+end_src
 
-#+RESULTS[c4db961da6bdfdec56bea2b4689dc82a8948a6f0]:
+#+RESULTS[ecd3f0615e57349af6ad4b8ab87c3c72d5aa21fe]:
 #+begin_example
+1
+0:00:00.000 --> 0:00:05.000
 Man, it's crazy out there.
+
+2
+0:00:05.000 --> 0:00:07.000
 You look sensational, man.
-Well, that's correct.
-And that's not just the cold medication talking.
-I'm telling you.
-You look great.
-You got the beard going on.
-It's very dynamic.
-Oh, thank you very much.
-No, it's good.
-You like Robin Williams?
-You grow a beard.
-Do you want an Oscar?
-No.
-All right.
-All right.
-So listen, tell me about the side-by-side movie you were interviewing.
-Is he really as much of a douche as everyone says he is?
+
+3
+0:00:07.000 --> 0:00:08.000
 #+end_example
 
 We can build a test around this just for comparing the different model sizes and helping us chose the parameters for when we scale the process up.
@@ -157,9 +159,116 @@ We are going to use Assembly AI's analysis[fn:2] to help us decide how to move f
 
 Our local CPU takes too long transcribing the 30 seconds and I don't have a GPU available right now so we are definitely going to the cloud.
 
+** Troubleshooting Dependencies
+:PROPERTIES:
+:CUSTOM_ID: troubleshooting-dependencies
+:END:
+
+Before dealing with audio signals, we must deal with a correct scipy installation. Because =poetry= likes to do things one way and scipy another, we must troubleshoot the following issue.
+#+begin_example
+The current project's Python requirement (>=3.10,<4.0) is not compatible with some of the required packages Python requirement:
+  - scipy requires Python >=3.8,<3.12, so it will not be satisfied for Python >=3.12,<4.0
+
+Because scipy (1.9.1) requires Python >=3.8,<3.12
+ and no versions of scipy match >1.9.1,<2.0.0, scipy is forbidden.
+So, because stt-crag-etl depends on scipy (^1.9.1), version solving failed.
+#+end_example
+
+So we simply edit our =pyproject.toml= file to match scipy's versions. The library =librosa= will install =scipy= as a dependency so we must deal with this issue before install =librosa=.
+
+#+begin_src toml :eval no
+[tool.poetry.dependencies]
+python = ">=3.10,<3.12"
+#+end_src
+
+Finally we will import pandas as its a requirement for =plotly express=. And we'll add =matplotlib= for quick visualizations.
+#+begin_src shell :dir .. :eval no
+poetry add pandas && poetry add matplotlib
+#+end_src
+
+
+* Visualizing features
+:PROPERTIES:
+:CUSTOM_ID: visualizing-features
+:END:
+
+** Loading audio
+:PROPERTIES:
+:CUSTOM_ID: loading-audio
+:END:
+
+We will use two libraries for audio visualization, the first one is =librosa=[fn:3] which will help us extracting features from our data and the second one is =plotly=[fn:4] which will use to match our own requirement for the final part of the project, which is a web app that uses =plotly= with JavaScript.
+
+#+begin_src shell :dir .. :eval no
+poetry add librosa && poetry add plotly
+#+end_src
+
+#+begin_src python :tangle audioviz.py :eval no
+import librosa
+import plotly.express as px
+import numpy as np
+from pathlib import Path
+import matplotlib.pyplot as plt
+import warnings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+resources = Path('resources') / 'test'
+output_file = resources / 'test.png'
+# Librosa data
+y, sr = librosa.load(resources / 'test.wav', mono=True)
+# mfcc = librosa.feature.mfcc(y=y[0:22050 * 4], sr=sr, hop_length=512, n_mfcc=13)
+lim = (sr*5, sr*8)
+data = y[lim[0]:lim[1]]
+oldsr = sr
+sr = int(sr/4)
+data = librosa.resample(data, orig_sr=oldsr, target_sr=sr)
+plt.figure(figsize=(8, 5), dpi=150)
+plt.specgram(data, Fs=2, NFFT=256, scale='dB', cmap='plasma')
+# plt.plot(data)
+plt.xticks(np.arange(0, sr*1.5, sr/4), labels=np.arange(5, 8, 0.5))
+plt.yticks(np.arange(0, 1, 0.2), labels=np.arange(0, sr, sr/5).astype(int))
+plt.title("Spectrogram for 'You look sensational, man'")
+plt.xlabel("Time (s)")
+plt.ylabel("Frequency (Hz)")
+plt.savefig(output_file)
+plt.close()
+print(output_file, end="")
+#+end_src
+
+#+begin_src shell :dir .. :results output file :wrap org
+python src/audioviz.py
+#+end_src
+
+#+RESULTS[4c32f6380815328d199b27156fce906217a205c4]:
+#+begin_org
+#+attr_html: :width 700px
+[[file:../resources/test/test.png]]
+#+end_org
+
+We downsampled the data for the visualization a few times in order to focus on the fundamental frequencies of the voice.
+
+#+begin_src html :eval yes :wrap export html :exports results
+<audio controls>
+  <source src="../resources/test/testcut.mp3" type="audio/mpeg">
+Audio element is not supported here.
+</audio>
+#+end_src
+
+#+RESULTS[5d8ecf20053bf379a9cae283d8d486dac8fd8d34]:
+#+begin_export html
+<audio controls>
+  <source src="../resources/test/testcut.mp3" type="audio/mpeg">
+Audio element is not supported here.
+</audio>
+#+end_export
+
+
+
 * Footnotes
 :PROPERTIES:
 :CUSTOM_ID: footnotes
 :END:
+[fn:4]https://plotly.com/python/
+[fn:3]https://librosa.org/doc/latest/index.html
 [fn:2]https://www.assemblyai.com/blog/how-to-run-openais-whisper-speech-recognition-model/#openai-whisper-analysis
 [fn:1]https://github.com/openai/whisper
