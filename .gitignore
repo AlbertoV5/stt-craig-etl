@@ -2,6 +2,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=emacs,python,macos
 
 **/*.mp4
+config/
 
 ### Emacs ###
 # -*- mode: gitignore; -*-
