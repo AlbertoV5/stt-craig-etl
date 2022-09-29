@@ -11,7 +11,7 @@ SOURCE = src
 BUILD = $(PUBLIC)/build
 STATIC = $(PUBLIC)/resources
 # Specific directories for commands to run after publishing.
-INDEX = index.html
+INDEX = $(PUBLIC)/index.html
 README = README.md
 # Project name based
 INDEX_TARGET = build/$(PROJECT_NAME).html
@@ -58,7 +58,7 @@ $(README): $(README_DOC)
 
 $(INDEX): $(CONFIG)/index.py $(PUBLIC)/$(INDEX_TARGET)
 	$(info    Building Index (redirecting to $(INDEX_TARGET))...)
-	@python $< $(PUBLIC)/$(INDEX_TARGET) $@
+	@python $< $(INDEX_TARGET) $@
 	$(DONE)
 
 clean-others: $(INDEX) $(README)
