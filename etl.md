@@ -21,39 +21,6 @@ git submodule add git@github.com:AlbertoV5/whisper.git whisper
 cat whisper/requirements.txt | xargs poetry add
 ```
 
-    Using version ^1.23.3 for numpy
-    Using version ^1.12.1 for torch
-    Using version ^4.64.1 for tqdm
-    Using version ^8.14.0 for more-itertools
-    
-    Updating dependencies
-    Resolving dependencies...
-    
-    Writing lock file
-    
-    Package operations: 20 installs, 0 updates, 0 removals
-    
-      • Installing certifi (2022.9.24)
-      • Installing charset-normalizer (2.1.1)
-      • Installing idna (3.4)
-      • Installing pyparsing (3.0.9)
-      • Installing urllib3 (1.26.12)
-      • Installing filelock (3.8.0)
-      • Installing packaging (21.3)
-      • Installing pyyaml (6.0)
-      • Installing requests (2.28.1)
-      • Installing tqdm (4.64.1)
-      • Installing typing-extensions (4.3.0)
-      • Installing future (0.18.2)
-      • Installing huggingface-hub (0.10.0)
-      • Installing numpy (1.23.3)
-      • Installing regex (2022.9.13)
-      • Installing tokenizers (0.12.1)
-      • Installing ffmpeg-python (0.2.0)
-      • Installing more-itertools (8.14.0)
-      • Installing torch (1.12.1)
-      • Installing transformers (4.22.2)
-
 Finall we will install `ffmpeg` globally as we also need it for running `whisper`.
 
 ```shell
@@ -100,8 +67,6 @@ bits_to_mb = lambda x: x / 8e6
 print(f"{round(duration * samplerate * channels * bits_to_mb(bits), 2)}")
 ```
 
-    1.44
-
 Our test is about 30 seconds long so our final file size will be: `1.44` MB. Assuming the average episode of the TV Show is no more than 40 minutes long, we would have `57.6` MB of audio to process per episode if we work with .wav files.
 
 We may need to compress to FLAC or MP3 as they are supported by whisper too<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup>.
@@ -115,9 +80,7 @@ Let&rsquo;s start by running `whisper` from the command line.
 poetry run whisper resources/test.wav
 ```
 
-    
-
-We are going to include an MP3 version of the test file in here.
+We are going to include an MP3 version of the test file in here. **Warning:** It starts moderately loud.
 
 <audio controls>
   <source src="../resources/test.mp3" type="audio/mpeg">

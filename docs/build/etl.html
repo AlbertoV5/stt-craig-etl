@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-09-28 Wed 20:19 -->
+<!-- 2022-09-28 Wed 20:28 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ETL</title>
@@ -56,7 +56,7 @@
 We are going to install everything under a <code>poetry</code> project. So the first thing is to initialize poetry and add the whisper dependency. Then we will add our fork of the whisper repository as submodule of this repo and then add all the dependencies to the poetry environment.
 </p>
 
-<div class="src-name" id="orge9f6f75">
+<div class="src-name" id="orgb6ff8fa">
 <p>
 
 </p>
@@ -67,7 +67,7 @@ We are going to install everything under a <code>poetry</code> project. So the f
 </pre>
 </div>
 
-<div class="src-name" id="orgf1627e2">
+<div class="src-name" id="orgb9f927c">
 <p>
 
 </p>
@@ -78,7 +78,7 @@ We are going to install everything under a <code>poetry</code> project. So the f
 </pre>
 </div>
 
-<div class="src-name" id="orgbe60ab7">
+<div class="src-name" id="org51c4039">
 <p>
 
 </p>
@@ -89,7 +89,7 @@ We are going to install everything under a <code>poetry</code> project. So the f
 </pre>
 </div>
 
-<div class="src-name" id="orgfc60a09">
+<div class="src-name" id="org81c9a0b">
 <p>
 
 </p>
@@ -100,46 +100,11 @@ We are going to install everything under a <code>poetry</code> project. So the f
 </pre>
 </div>
 
-<pre class="example" id="org93fd1c0">
-Using version ^1.23.3 for numpy
-Using version ^1.12.1 for torch
-Using version ^4.64.1 for tqdm
-Using version ^8.14.0 for more-itertools
-
-Updating dependencies
-Resolving dependencies...
-
-Writing lock file
-
-Package operations: 20 installs, 0 updates, 0 removals
-
-  • Installing certifi (2022.9.24)
-  • Installing charset-normalizer (2.1.1)
-  • Installing idna (3.4)
-  • Installing pyparsing (3.0.9)
-  • Installing urllib3 (1.26.12)
-  • Installing filelock (3.8.0)
-  • Installing packaging (21.3)
-  • Installing pyyaml (6.0)
-  • Installing requests (2.28.1)
-  • Installing tqdm (4.64.1)
-  • Installing typing-extensions (4.3.0)
-  • Installing future (0.18.2)
-  • Installing huggingface-hub (0.10.0)
-  • Installing numpy (1.23.3)
-  • Installing regex (2022.9.13)
-  • Installing tokenizers (0.12.1)
-  • Installing ffmpeg-python (0.2.0)
-  • Installing more-itertools (8.14.0)
-  • Installing torch (1.12.1)
-  • Installing transformers (4.22.2)
-</pre>
-
 <p>
 Finall we will install <code>ffmpeg</code> globally as we also need it for running <code>whisper</code>.
 </p>
 
-<div class="src-name" id="org50ea078">
+<div class="src-name" id="org35559bb">
 <p>
 
 </p>
@@ -176,7 +141,7 @@ We are going to add the test to the repository but we won&rsquo;t upload any mp4
 We are going to start by converting the .mp4 video file to a .wav file, which is audio only.
 </p>
 
-<div class="src-name" id="orgc7b43a6">
+<div class="src-name" id="org6fee958">
 <p>
 
 </p>
@@ -195,7 +160,7 @@ We are going to change the conversion settings because our source is already com
 Then we are going to reduce the number of channels from 2 to 1. In an ideal scenario, we would do this by encoding to M/S (midside) and then getting rid of the side channel but we are going to stop at the ffmpeg interface and provide the <code>-ac 1</code> flag instead. In the future we can improve the process by finding a Midside tool. The reason for using the mid channel only is that TV broadcasts are mixed with the dialog in the center channel.
 </p>
 
-<div class="src-name" id="org10f05ff">
+<div class="src-name" id="org6295b87">
 <p>
 
 </p>
@@ -255,10 +220,6 @@ wavsize
 </pre>
 </div>
 
-<pre class="example" id="org9b9e686">
-1.44
-</pre>
-
 <p>
 Our test is about 30 seconds long so our final file size will be: <code>1.44</code> MB. Assuming the average episode of the TV Show is no more than 40 minutes long, we would have <code>57.6</code> MB of audio to process per episode if we work with .wav files.
 </p>
@@ -276,7 +237,7 @@ We may need to compress to FLAC or MP3 as they are supported by whisper too<sup>
 Let&rsquo;s start by running <code>whisper</code> from the command line.
 </p>
 
-<div class="src-name" id="org60923ba">
+<div class="src-name" id="org9c71359">
 <p>
 
 </p>
@@ -287,12 +248,8 @@ Let&rsquo;s start by running <code>whisper</code> from the command line.
 </pre>
 </div>
 
-<pre class="example" id="org53cd9f1">
-
-</pre>
-
 <p>
-We are going to include an MP3 version of the test file in here.
+We are going to include an MP3 version of the test file in here. <b>Warning:</b> It starts moderately loud.
 </p>
 <audio controls>
   <source src="../resources/test.mp3" type="audio/mpeg">
@@ -303,7 +260,7 @@ Your browser does not support the audio element.
 And here is the transcript from whisper:
 </p>
 
-<div class="src-name" id="org30368a2">
+<div class="src-name" id="org805a42d">
 <p>
 
 </p>
@@ -314,7 +271,7 @@ And here is the transcript from whisper:
 </pre>
 </div>
 
-<pre class="example" id="org99d14ab">
+<pre class="example" id="orge275b4f">
 Man, it's crazy out there.
 You look sensational, man.
 Well, that's correct.
@@ -371,7 +328,7 @@ Our local CPU takes too long transcribing the 30 seconds and I don&rsquo;t have 
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Author: Alberto Valdez</p>
-<p class="date">Created: 2022-09-28 Wed 20:19</p>
+<p class="date">Created: 2022-09-28 Wed 20:28</p>
 </div>
 </body>
 </html>

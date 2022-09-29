@@ -31,42 +31,6 @@ git submodule add git@github.com:AlbertoV5/whisper.git whisper
 cat whisper/requirements.txt | xargs poetry add
 #+end_src
 
-#+RESULTS[51206ad79a3d9678a0d1296a71edd4af20ac631e]:
-#+begin_example
-Using version ^1.23.3 for numpy
-Using version ^1.12.1 for torch
-Using version ^4.64.1 for tqdm
-Using version ^8.14.0 for more-itertools
-
-Updating dependencies
-Resolving dependencies...
-
-Writing lock file
-
-Package operations: 20 installs, 0 updates, 0 removals
-
-  • Installing certifi (2022.9.24)
-  • Installing charset-normalizer (2.1.1)
-  • Installing idna (3.4)
-  • Installing pyparsing (3.0.9)
-  • Installing urllib3 (1.26.12)
-  • Installing filelock (3.8.0)
-  • Installing packaging (21.3)
-  • Installing pyyaml (6.0)
-  • Installing requests (2.28.1)
-  • Installing tqdm (4.64.1)
-  • Installing typing-extensions (4.3.0)
-  • Installing future (0.18.2)
-  • Installing huggingface-hub (0.10.0)
-  • Installing numpy (1.23.3)
-  • Installing regex (2022.9.13)
-  • Installing tokenizers (0.12.1)
-  • Installing ffmpeg-python (0.2.0)
-  • Installing more-itertools (8.14.0)
-  • Installing torch (1.12.1)
-  • Installing transformers (4.22.2)
-#+end_example
-
 Finall we will install =ffmpeg= globally as we also need it for running =whisper=.
 
 #+begin_src shell :eval no
@@ -91,7 +55,7 @@ We are going to add the test to the repository but we won't upload any mp4 file 
 
 We are going to start by converting the .mp4 video file to a .wav file, which is audio only.
 
-#+begin_src shell :eval no
+#+begin_src shell :eval no :exports code
 ffmpeg -i resources/test.mp4 resources/test.wav
 #+end_src
 
@@ -110,7 +74,7 @@ So in the end we end up with the following audio specifications.
 | .wav   |        1 |       24000 |   16 |
 
 #+NAME: wavsize
-#+begin_src python :var duration=30
+#+begin_src python :var duration=30 :exports code
 channels = 1
 samplerate = 24000
 bits = 16
@@ -134,11 +98,11 @@ We may need to compress to FLAC or MP3 as they are supported by whisper too[fn:1
 
 Let's start by running =whisper= from the command line.
 
-#+begin_src shell :dir ..
+#+begin_src shell :dir .. :exports code :eval no
 poetry run whisper resources/test.wav
 #+end_src
 
-We are going to include an MP3 version of the test file in here.
+We are going to include an MP3 version of the test file in here. *Warning:* It starts moderately loud.
 #+begin_src html :eval yes :wrap export html :exports results
 <audio controls>
   <source src="../resources/test.mp3" type="audio/mpeg">
