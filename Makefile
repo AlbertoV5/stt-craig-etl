@@ -4,14 +4,12 @@ PROJECT_NAME = etl
 EMACS = emacsclient --suppress-output --eval
 # Directories:
 CONFIG = config
-DOCS = docs
-PUBLIC = public
+DOCS = .
+PUBLIC = docs
 RESOURCES = resources
 SOURCE = src
 BUILD = $(PUBLIC)/build
 STATIC = $(PUBLIC)/resources
-THEME = $(RESOURCES)/theme
-THEME_PUB = $(STATIC)/theme
 # Specific directories for commands to run after publishing.
 INDEX = index.html
 README = README.md
@@ -37,7 +35,7 @@ update:
 title:
 	@echo "\033[1m-------------------------\n Processing: $(PROJECT_NAME)\n-------------------------\x1b[0m"
 
-.PHONY: all clean update commit theme
+.PHONY: all clean update commit
 #---------------------------
 #	EMACS-HANDLED TARGETS
 #---------------------------
@@ -74,15 +72,8 @@ commit: all
 	@git commit -m 'Auto-commit published: $(TIME)'
 	@echo "\033[1mAuto-commit published: $(TIME)\x1b[0m"
 
-clean-exports: $(STATIC) $(BUILD) $(DOCS)
+clean-exports: $(STATIC) $(BUILD)
 	$(info    Cleaning $^...)
 	@touch $(STATIC) && rm -r $(STATIC) && mkdir $(STATIC)
 	@touch $(BUILD) && rm -r $(BUILD) && mkdir $(BUILD)
-	@touch $(DOCS)/t.txt && rm -r $(DOCS)/*
-	$(DONE)
-
-theme: $(THEME)
-	$(info     Copying Theme to $(THEME_PUB)...)
-	@touch $(THEME_PUB) && rm -r $(THEME_PUB) && mkdir -p $(THEME_PUB)
-	@cp -r $</* $(THEME_PUB)
 	$(DONE)
